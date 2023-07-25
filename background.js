@@ -5,16 +5,14 @@ let selectedId = -1;
 
 function refreshCount(tabId) {
   const txt = tab_listeners[tabId] ? tab_listeners[tabId].length : 0;
-  chrome.browserAction.setBadgeText({ text: '' + txt, tabId: tabId });
-  chrome.browserAction.setBadgeBackgroundColor({
-    color: txt > 0 ? [255, 0, 0, 255] : [0, 0, 255, 0]
-  });
+  // Send message to popup script to update the badge count
+  chrome.runtime.sendMessage({ action: 'updateBadgeCount', tabId: tabId, count: txt });
 }
 
 function logListener(data) {
   chrome.storage.sync.get({
     log_url: ''
-  }, function(items) {
+  }, function (items) {
     const log_url = items.log_url;
     if (!log_url.length) return;
     data = JSON.stringify(data);
