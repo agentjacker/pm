@@ -3,15 +3,11 @@ let tab_push = {};
 let tab_lasturl = {};
 let selectedId = -1;
 
-function refreshCount() {
-  const txt = tab_listeners[selectedId] ? tab_listeners[selectedId].length : 0;
-  chrome.tabs.get(selectedId, function(tab) {
-    if (!chrome.runtime.lastError) {
-      chrome.browserAction.setBadgeText({ text: '' + txt, tabId: selectedId });
-      chrome.browserAction.setBadgeBackgroundColor({
-        color: txt > 0 ? [255, 0, 0, 255] : [0, 0, 255, 0]
-      });
-    }
+function refreshCount(tabId) {
+  const txt = tab_listeners[tabId] ? tab_listeners[tabId].length : 0;
+  chrome.browserAction.setBadgeText({ text: '' + txt, tabId: tabId });
+  chrome.browserAction.setBadgeBackgroundColor({
+    color: txt > 0 ? [255, 0, 0, 255] : [0, 0, 255, 0]
   });
 }
 
@@ -53,14 +49,14 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.log) {
     console.log(msg.log);
   } else {
-    refreshCount();
+    refreshCount(tabId);
   }
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, props) {
   console.log(props);
   if (props.status === "complete") {
-    if (tabId === selectedId) refreshCount();
+    if (tabId === selectedId) refreshCount(tabId);
   } else if (props.status) {
     if (tab_push[tabId]) {
       // This was a pushState, ignore
@@ -80,18 +76,18 @@ chrome.tabs.onUpdated.addListener(function (tabId, props) {
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   selectedId = activeInfo.tabId;
-  refreshCount();
+  refreshCount(selectedId);
 });
 
 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
   selectedId = tabs[0].id;
-  refreshCount();
+  refreshCount(selectedId);
 });
 
 chrome.runtime.onConnect.addListener(function (port) {
   port.onMessage.addListener(function (msg) {
     if (msg.action === "get-stuff") {
-      port.postMessage({ listeners: tab_listeners });
+      port.postMessage({ listeners: tab_listeners, checkLater: checkLaterInteractions });
     }
   });
 });
