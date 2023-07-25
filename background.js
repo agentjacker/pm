@@ -5,8 +5,10 @@ let selectedId = -1;
 
 function refreshCount(tabId) {
   const txt = tab_listeners[tabId] ? tab_listeners[tabId].length : 0;
-  // Send message to popup script to update the badge count
-  chrome.runtime.sendMessage({ action: 'updateBadgeCount', tabId: tabId, count: txt });
+  // Send message directly to the popup script to update the badge count
+  chrome.extension.getViews({ type: 'popup' }).forEach((popup) => {
+    popup.updateBadgeCount(tabId, txt);
+  });
 }
 
 function logListener(data) {
@@ -82,7 +84,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
   refreshCount(selectedId);
 });
 
-chrome.runtime.onConnect.addListener(function (port) {
+chrome.extension.onConnect.addListener(function (port) {
   port.onMessage.addListener(function (msg) {
     if (msg.action === "get-stuff") {
       port.postMessage({ listeners: tab_listeners, checkLater: checkLaterInteractions });
