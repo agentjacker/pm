@@ -11,40 +11,23 @@ function logListener(data) {
   // Implementation of logListener (unchanged)
 }
 
-chrome.runtime.onConnect.addListener(function(port) {
-  console.log("Port connected.");
-  port.onMessage.addListener(function(msg) {
-    console.log('message from cs', msg);
-    tabId = port.sender.tab.id;
-    if (msg.listener) {
-      // Implementation of message handling (unchanged)
-    }
-    if (msg.pushState) {
-      // Implementation of pushState handling (unchanged)
-    }
-    if (msg.changePage) {
-      // Implementation of changePage handling (unchanged)
-    }
-    if (msg.log) {
-      console.log(msg.log);
-    } else {
-      refreshCount();
-    }
-  });
-
-  port.onDisconnect.addListener(function() {
-    console.log("Port disconnected.");
-  });
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+  console.log('message from cs', msg);
+  tabId = sender.tab.id;
+  if (msg.action === "get-stuff") {
+    sendResponse({ listeners: tab_listeners });
+  }
+  // Add other message handling if needed
 });
 
-chrome.tabs.onUpdated.addListener(function(tabId, props) {
+chrome.tabs.onUpdated.addListener(function (tabId, props) {
   // Implementation of tabs.onUpdated event handling (unchanged)
 });
 
-chrome.tabs.onActivated.addListener(function(activeInfo) {
+chrome.tabs.onActivated.addListener(function (activeInfo) {
   // Implementation of tabs.onActivated event handling (unchanged)
 });
 
-chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
   // Implementation of query active tab (unchanged)
 });
