@@ -1,16 +1,20 @@
-var port = chrome.runtime.connect({ name: "Sample Communication" });
-
-function loaded() {
-  port.onDisconnect.addListener(function() {
-    console.error("Port disconnected. Please check your background script.");
+function getTabListeners() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    if (tabs.length > 0) {
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, { action: "get-stuff" }, function (response) {
+        if (response && response.listeners) {
+          listListeners(response.listeners[tabId]);
+        }
+      });
+    }
   });
-
-  port.postMessage({ action: "get-stuff" });
 }
 
-document.addEventListener('DOMContentLoaded', loaded);
+document.addEventListener('DOMContentLoaded', function () {
+  getTabListeners();
+});
 
 function listListeners(listeners) {
   // Implementation of listing listeners in the popup (unchanged)
 }
-
