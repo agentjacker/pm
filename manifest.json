@@ -4,10 +4,10 @@
   "description": "Monitors and indicates postMessage-listeners in the current window.",
   "version": "1.0.0",
   "action": {
-    "default_popup": "popup.html",
-    "background": {
-      "service_worker": "background.js"
-    }
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
